@@ -3,12 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Hệ Thống Quản Lý Phòng Trọ</title>
+    <!-- Thư viện xuất file Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Thư viện vẽ biểu đồ Google Charts -->
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f7; margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1250px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
+        /* Giao diện màn hình khóa PIN */
+        .lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .lock-box { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); text-align: center; max-width: 320px; width: 100%; }
+        .lock-box h3 { margin-top: 0; color: #1d1d1f; font-size: 18px; margin-bottom: 20px; }
+        .pin-input { text-align: center; font-size: 24px; letter-spacing: 10px; padding: 12px; border-radius: 8px; border: 1px solid #d2d2d7; margin-bottom: 15px; font-weight: bold; }
+        .btn-unlock { background: #0071e3; color: white; border: none; width: 100%; padding: 12px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-unlock:hover { background: #0077ed; }
+        .pin-err { color: #ff3b30; font-size: 13px; font-weight: bold; margin-top: 10px; display: none; }
+
+        /* Vùng nội dung chính (Mặc định ẩn) */
+        #mainAppContent { display: none; }
+
         .header-area { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e5ea; padding-bottom: 15px; margin-bottom: 20px; }
         .header-area h2 { margin: 0; color: #1d1d1f; }
         .btn-edit-title { background: #8e8e93; color: white; border: none; padding: 6px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; font-weight: 500; }
@@ -38,7 +52,6 @@
         .btn-phone-action { background: none; border: none; cursor: pointer; padding: 4px; font-size: 14px; border-radius: 4px; transition: 0.2s; }
         .btn-phone-action:hover { background: #f2f2f7; }
         
-        /* Giao diện vùng chỉnh sửa SĐT */
         .phone-edit-area { display: none; margin-top: 5px; background: #f4f4f4; padding: 8px; border-radius: 6px; border: 1px solid #d2d2d7; }
         .phone-input-row { display: flex; gap: 4px; align-items: center; margin-top: 4px; }
         .phone-input { font-size: 12px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; flex: 1; }
@@ -67,8 +80,13 @@
         
         .btn-action { background: #0071e3; color: white; border: none; padding: 6px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; font-weight: 500; }
         .btn-action:hover { background: #0077ed; }
-        .btn-main { background: #34c759; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-        .btn-main:hover { background: #30b651; }
+        
+        /* CSS cho cụm 2 nút bấm tách biệt */
+        .action-buttons-row { display: flex; gap: 15px; margin-top: 15px; }
+        .btn-main-green { background: #34c759; color: white; border: none; padding: 14px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; }
+        .btn-main-green:hover { background: #30b651; }
+        .btn-main-gray { background: #555559; color: white; border: none; padding: 14px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; }
+        .btn-main-gray:hover { background: #3a3a3d; }
 
         .history-box { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; line-height: 1.5; }
 
@@ -76,12 +94,25 @@
             body * { visibility: hidden; }
             #invoicePrintZone, #invoicePrintZone * { visibility: visible; }
             #invoicePrintZone { position: absolute; left: 0; top: 0; width: 100%; }
+            .lock-screen { display: none !important; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- MÀN HÌNH KHÓA BẢO MẬT MÃ PIN -->
+<div class="lock-screen" id="lockScreenPanel">
+    <div class="lock-box">
+        <span style="font-size: 40px;">🔒</span>
+        <h3>HỆ THỐNG ĐANG KHÓA</h3>
+        <input type="password" class="pin-input" id="txtPinValue" maxlength="4" placeholder="••••" onkeydown="if(event.key==='Enter') verifySystemPin()">
+        <button class="btn-unlock" onclick="verifySystemPin()">🔓 Mở Khóa Giao Diện</button>
+        <div class="pin-err" id="lblPinError">❌ Mã PIN không chính xác! Vui lòng thử lại.</div>
+    </div>
+</div>
+
+<!-- NỘI DUNG ỨNG DỤNG (CHỈ HIỆN KHI NHẬP ĐÚNG PIN) -->
+<div class="container" id="mainAppContent">
     
     <div class="header-area">
         <h2 id="txtAppTitle">🏠 Hệ Thống Quản Lý Phòng Trọ Online</h2>
@@ -92,6 +123,7 @@
         🔄 Đang kết nối mạng và đồng bộ kho dữ liệu từ Google Sheets...
     </div>
 
+    <!-- Cấu hình chung -->
     <div class="config-row">
         <div class="form-group" style="flex: 1.1;">
             <label>Chọn Tháng / Năm Tính Tiền</label>
@@ -135,10 +167,16 @@
         </div>
     </div>
 
+    <!-- Lưới nhập liệu 7 phòng -->
     <div class="rooms-grid" id="roomsContainer"></div>
 
-    <button class="btn-main" onclick="xuatExcelVaLuuTruOnline()">☁️ LƯU LÊN MẠNG ONLINE & XUẤT FILE EXCEL</button>
+    <!-- Tách biệt cụm 2 nút bấm theo yêu cầu -->
+    <div class="action-buttons-row">
+        <button class="btn-main-green" onclick="luuDuLieuLenOnline()">☁️ LƯU LÊN MẠNG ONLINE</button>
+        <button class="btn-main-gray" onclick="taiFileExcelBackup()">📊 XUẤT FILE EXCEL BACKUP</button>
+    </div>
 
+    <!-- Bảng tổng hợp thực tế -->
     <h3 style="margin-top: 40px; text-align:left;">📊 Bảng Tổng Hợp Doanh Thu (<span class="txtThangHienTai">Tháng 06/2026</span>)</h3>
     <table>
         <thead>
@@ -158,6 +196,7 @@
         <tbody id="summaryBody"></tbody>
     </table>
 
+    <!-- Khối đối chiếu điện lực -->
     <div class="flex-tables">
         <div class="table-half">
             <h3>⚡ Bảng Giá Điện Bậc Thang Lũy Tiến (2026)</h3>
@@ -194,8 +233,22 @@
 <script>
     google.charts.load('current', {'packages':['corechart']});
 
-    // 🔗 DÁN ĐƯỜNG LINK URL CỦA GOOGLE APPS SCRIPT VÀO GIỮA DẤU NHÁY KÉP NÀY:
+    // 🔗 DÁN ĐƯỜNG LINK URL CỦA GOOGLE APPS SCRIPT VÀO ĐÂY:
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxjBLGrs4HdOLWyV-y14G2XKPULlWnjy55_Is3jFZbciXfVOwnfHY3_J5NCcP5RLrNLoA/exec";
+
+    // Hàm kiểm tra mã PIN 2456 bảo mật
+    function verifySystemPin() {
+        const pinInput = document.getElementById('txtPinValue').value;
+        if (pinInput === "2456") {
+            document.getElementById('lockScreenPanel').style.display = 'none';
+            document.getElementById('mainAppContent').style.display = 'block';
+            // Kích hoạt vẽ lại biểu đồ khi giao diện mở ra
+            setTimeout(veTatCaBieuDo, 300);
+        } else {
+            document.getElementById('lblPinError').style.display = 'block';
+            document.getElementById('txtPinValue').value = "";
+        }
+    }
 
     const khoDuLieuGocExcel = {
         "2025-12": [{i:1, tPhong:1200000, soCu:4744, soMoi:4826, chenhLech:82, tDien:246000, phuThu:0, tienRac:30000, tongCong:1476000},{i:2, tPhong:1200000, soCu:4897, soMoi:4908, chenhLech:11, tDien:33000, phuThu:0, tienRac:30000, tongCong:1263000},{i:3, tPhong:1200000, soCu:3957, soMoi:3967, chenhLech:10, tDien:30000, phuThu:0, tienRac:30000, tongCong:1260000},{i:4, tPhong:1200000, soCu:4911, soMoi:5000, chenhLech:89, tDien:267000, phuThu:0, tienRac:30000, tongCong:1497000},{i:5, tPhong:1200000, soCu:7811, soMoi:7832, chenhLech:21, tDien:63000, phuThu:0, tienRac:30000, tongCong:1293000},{i:6, tPhong:1200000, soCu:3335, soMoi:3390, chenhLech:55, tDien:165000, phuThu:0, tienRac:30000, tongCong:1395000},{i:7, tPhong:1200000, soCu:3393, soMoi:3439, chenhLech:46, tDien:138000, phuThu:0, tienRac:30000, tongCong:1368000}],
@@ -325,16 +378,10 @@
 
         if (ySelect > yReal || (ySelect === yReal && mSelect > mReal)) {
             let xacNhan = confirm(`⚠️ Cảnh báo: Bạn đang chọn một tháng trong tương lai (${dinhDangThangNam(rawDate)}).\n\n- Bấm "OK" để tiếp tục nhập liệu.\n- Bấm "Cancel" để quay về tháng hiện tại.`);
-            if (xacNhan) {
-                thangHienTaiHopLe = rawDate;
-                return true;
-            } else {
-                inputThang.value = thangHienTaiHopLe;
-                return false;
-            }
+            if (xacNhan) { thangHienTaiHopLe = rawDate; return true; } 
+            else { inputThang.value = thangHienTaiHopLe; return false; }
         }
-        thangHienTaiHopLe = rawDate;
-        return true;
+        thangHienTaiHopLe = rawDate; return true;
     }
 
     function loadDuyenNoisBo() {
@@ -412,7 +459,7 @@
     }
 
     function veTatCaBieuDo() {
-        if (!google.visualization) return;
+        if (!google.visualization || document.getElementById('mainAppContent').style.display === 'none') return;
         let danhSachThang = [];
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
@@ -537,7 +584,8 @@
         if (imgQr) { imgQr.onload = function() { window.print(); }; setTimeout(function(){ window.print(); }, 1200); }
     }
 
-    async function xuatExcelVaLuuTruOnline() {
+    // ☁️ NÚT 1: CHỈ LÀM NHIỆM VỤ LƯU ONLINE LÊN GOOGLE SHEETS
+    async function luuDuLieuLenOnline() {
         const rawDate = document.getElementById('thangNam').value;
         const thangLabel = dinhDangThangNam(rawDate);
         if (listRoomsData.length === 0) { alert("Không có dữ liệu để lưu!"); return; }
@@ -553,11 +601,21 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ thang: rawDate, rooms: listRoomsData, phones: khoSdtOnline })
                 });
-                alert(`☁️ Dữ liệu ${thangLabel} đã đồng bộ an toàn lên Google Sheets.`);
+                alert(`☁️ Thành công! Toàn bộ số liệu ${thangLabel} đã đồng bộ lên mây Google Sheets.`);
+                taiDuLieuTuGoogleSheets();
             } catch (err) {
-                alert("⚠️ Lỗi mạng. Dữ liệu chỉ tạm lưu Offline tại máy này.");
+                alert("⚠️ Lỗi kết nối mạng. Dữ liệu chỉ tạm lưu nội bộ Offline.");
             }
+        } else {
+            alert("⚠️ Bạn chưa cấu hình cấu URL Google Script để lưu trực tuyến.");
         }
+    }
+
+    // 📊 NÚT 2: CHỈ LÀM NHIỆM VỤ TẢI FILE EXCEL BACKUP VỀ MAC
+    function taiFileExcelBackup() {
+        const rawDate = document.getElementById('thangNam').value;
+        const thangLabel = dinhDangThangNam(rawDate);
+        if (listRoomsData.length === 0) { alert("Không có dữ liệu để xuất Excel!"); return; }
 
         const wb = XLSX.utils.book_new();
         let excelRows = [["BẢNG TỔNG HỢP HOẠT ĐỘNG KINH DOANH - " + thangLabel.toUpperCase()],[],["Phòng", "Tiền phòng", "Số điện cũ", "Số điện mới", "Điện tiêu thụ (kWh)", "Tiền điện thu", "Phụ thu", "Tiền rác", "Tổng tiền thu"]];
@@ -574,8 +632,6 @@
         const ws = XLSX.utils.aoa_to_sheet(excelRows);
         XLSX.utils.book_append_sheet(wb, ws, "Hoạt động");
         XLSX.writeFile(wb, `Bao_Cao_Phong_Tro_${thangLabel.replace('/', '_')}.xlsx`);
-        
-        taiDuLieuTuGoogleSheets();
     }
 
     taiDuLieuTuGoogleSheets();

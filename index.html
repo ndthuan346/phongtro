@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Hệ Thống Quản Lý Phòng Trọ</title>
+    <!-- Thư viện xuất file Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Thư viện vẽ biểu đồ Google Charts -->
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f7; margin: 0; padding: 20px; color: #333; }
@@ -17,7 +19,7 @@
         .btn-unlock { background: #0071e3; color: white; border: none; width: 100%; padding: 12px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-unlock:hover { background: #0077ed; }
         .pin-err { color: #ff3b30; font-size: 13px; font-weight: bold; margin-top: 10px; display: none; }
- 
+
         /* Vùng nội dung chính (Mặc định ẩn) */
         #mainAppContent { display: none; }
 
@@ -88,16 +90,17 @@
 
         .history-box { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; line-height: 1.5; }
 
-        /* SỬA LỖI TRANG TRẮNG KHI IN CHÍNH XÁC */
         @media print {
-            body { background: white; padding: 0; margin: 0; }
-            .container, .lock-screen, script { display: none !important; }
-            #invoicePrintZone { display: block !important; position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+            body * { visibility: hidden; }
+            #invoicePrintZone, #invoicePrintZone * { visibility: visible; }
+            #invoicePrintZone { position: absolute; left: 0; top: 0; width: 100%; }
+            .lock-screen { display: none !important; }
         }
     </style>
 </head>
 <body>
 
+<!-- MÀN HÌNH KHÓA BẢO MẬT MÃ PIN -->
 <div class="lock-screen" id="lockScreenPanel">
     <div class="lock-box">
         <span style="font-size: 40px;">🔒</span>
@@ -108,6 +111,7 @@
     </div>
 </div>
 
+<!-- NỘI DUNG ỨNG DỤNG (CHỈ HIỆN KHI NHẬP ĐÚNG PIN) -->
 <div class="container" id="mainAppContent">
     
     <div class="header-area">
@@ -119,6 +123,7 @@
         🔄 Đang kết nối mạng và đồng bộ kho dữ liệu từ Google Sheets...
     </div>
 
+    <!-- Cấu hình chung -->
     <div class="config-row">
         <div class="form-group" style="flex: 1.1;">
             <label>Chọn Tháng / Năm Tính Tiền</label>
@@ -162,13 +167,16 @@
         </div>
     </div>
 
+    <!-- Lưới nhập liệu 7 phòng -->
     <div class="rooms-grid" id="roomsContainer"></div>
 
+    <!-- Tách biệt cụm 2 nút bấm theo yêu cầu -->
     <div class="action-buttons-row">
         <button class="btn-main-green" onclick="luuDuLieuLenOnline()">☁️ LƯU LÊN MẠNG ONLINE</button>
         <button class="btn-main-gray" onclick="taiFileExcelBackup()">📊 XUẤT FILE EXCEL BACKUP</button>
     </div>
 
+    <!-- Bảng tổng hợp thực tế -->
     <h3 style="margin-top: 40px; text-align:left;">📊 Bảng Tổng Hợp Doanh Thu (<span class="txtThangHienTai">Tháng 06/2026</span>)</h3>
     <table>
         <thead>
@@ -188,6 +196,7 @@
         <tbody id="summaryBody"></tbody>
     </table>
 
+    <!-- Khối đối chiếu điện lực -->
     <div class="flex-tables">
         <div class="table-half">
             <h3>⚡ Bảng Giá Điện Bậc Thang Lũy Tiến (2026)</h3>
@@ -224,13 +233,16 @@
 <script>
     google.charts.load('current', {'packages':['corechart']});
 
+    // 🔗 DÁN ĐƯỜNG LINK URL CỦA GOOGLE APPS SCRIPT VÀO ĐÂY:
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxjBLGrs4HdOLWyV-y14G2XKPULlWnjy55_Is3jFZbciXfVOwnfHY3_J5NCcP5RLrNLoA/exec";
 
+    // Hàm kiểm tra mã PIN 2456 bảo mật
     function verifySystemPin() {
         const pinInput = document.getElementById('txtPinValue').value;
         if (pinInput === "2456") {
             document.getElementById('lockScreenPanel').style.display = 'none';
             document.getElementById('mainAppContent').style.display = 'block';
+            // Kích hoạt vẽ lại biểu đồ khi giao diện mở ra
             setTimeout(veTatCaBieuDo, 300);
         } else {
             document.getElementById('lblPinError').style.display = 'block';
@@ -331,6 +343,10 @@
         document.getElementById(`btn_pt_${id}`).style.display = 'block';
         document.getElementById(`pt_${id}`).value = 0;
         tinhToanTatCa();
+    }
+
+    function layThongKeDongBoChuan(thangDangChonRaw) {
+        return `Đã tích hợp và đồng bộ lịch sử dữ liệu liên tục từ <b>Tháng 12/2025</b> đến <b>${dinhDangThangNam(thangDangChonRaw)}</b>.`;
     }
 
     function laySoCuThongMinh(thangHienTai) {
@@ -436,7 +452,7 @@
                             💰 Tổng cộng: <span id="tong_${i}" style="color:#d00; font-weight:bold;">0</span> đ
                         </div>
                     </div>
-                    <div class="chart-container" id="chart_div_${roomNum}"></div>
+                    <div class="chart-container" id="chart_div_${i}"></div>
                 </div>
             `;
         }
@@ -455,9 +471,9 @@
         }
         const thangHienTaiRaw = document.getElementById('thangNam').value;
         if(!danhSachThang.includes(thangHienTaiRaw)) danhSachThang.push(thangHienTaiRaw);
-        gridThang = danhSachThang.sort();
+        danhSachThang.sort();
 
-        let sáuThángGầnNhất = gridThang.slice(Math.max(0, gridThang.indexOf(thangHienTaiRaw) - 5), gridThang.indexOf(thangHienTaiRaw) + 1);
+        let sáuThángGầnNhất = danhSachThang.slice(Math.max(0, danhSachThang.indexOf(thangHienTaiRaw) - 5), danhSachThang.indexOf(thangHienTaiRaw) + 1);
 
         for (let roomNum = 1; roomNum <= 7; roomNum++) {
             let dataTable = new google.visualization.DataTable();
@@ -556,7 +572,6 @@
         elHaoHut.style.color = loiNhuanHaoHut >= 0 ? "#34c759" : "#ff3b30";
     }
 
-    /* SỬA LỖI HIỂN THỊ 2 LẦN LỆNH IN BẰNG BIẾN CỜ hasPrinted */
     function inHoaDon(roomNum) {
         const r = listRoomsData.find(item => item.i === roomNum);
         const thangLabel = dinhDangThangNam(document.getElementById('thangNam').value);
@@ -569,23 +584,12 @@
 
         const imgQr = document.getElementById('qrImageElement');
         if (imgQr) { 
-            let hasPrinted = false; // Biến cờ ngăn in lần thứ 2
-
-            imgQr.onload = function() { 
-                if (!hasPrinted) {
-                    hasPrinted = true;
-                    window.print(); 
-                }
-            }; 
-            setTimeout(function(){ 
-                if(!hasPrinted) { 
-                    hasPrinted = true;
-                    window.print(); 
-                } 
-            }, 2000); 
+            imgQr.onload = function() { window.print(); }; 
+            setTimeout(function(){ if(!imgQr.complete) { window.print(); } }, 2000); 
         }
     }
 
+    // ☁️ NÚT 1: CHỈ LÀM NHIỆM VỤ LƯU ONLINE LÊN GOOGLE SHEETS
     async function luuDuLieuLenOnline() {
         const rawDate = document.getElementById('thangNam').value;
         const thangLabel = dinhDangThangNam(rawDate);
@@ -612,6 +616,7 @@
         }
     }
 
+    // 📊 NÚT 2: CHỈ LÀM NHIỆM VỤ TẢI FILE EXCEL BACKUP VỀ MAC
     function taiFileExcelBackup() {
         const rawDate = document.getElementById('thangNam').value;
         const thangLabel = dinhDangThangNam(rawDate);

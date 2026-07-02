@@ -88,11 +88,11 @@
 
         .history-box { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; line-height: 1.5; }
 
+        /* SỬA LỖI TRANG TRẮNG KHI IN CHÍNH XÁC */
         @media print {
-            body { background: white; }
-            .container, .lock-screen, #historyNotify { display: none !important; }
-            #invoicePrintZone, #invoicePrintZone * { visibility: visible; display: block !important; }
-            #invoicePrintZone { position: absolute; left: 0; top: 0; width: 100%; }
+            body { background: white; padding: 0; margin: 0; }
+            .container, .lock-screen, script { display: none !important; }
+            #invoicePrintZone { display: block !important; position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
         }
     </style>
 </head>
@@ -224,16 +224,13 @@
 <script>
     google.charts.load('current', {'packages':['corechart']});
 
-    // 🔗 DÁN ĐƯỜNG LINK URL CỦA GOOGLE APPS SCRIPT VÀO ĐÂY:
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxjBLGrs4HdOLWyV-y14G2XKPULlWnjy55_Is3jFZbciXfVOwnfHY3_J5NCcP5RLrNLoA/exec";
 
-    // Hàm kiểm tra mã PIN 2456 bảo mật
     function verifySystemPin() {
         const pinInput = document.getElementById('txtPinValue').value;
         if (pinInput === "2456") {
             document.getElementById('lockScreenPanel').style.display = 'none';
             document.getElementById('mainAppContent').style.display = 'block';
-            // Kích hoạt vẽ lại biểu đồ khi giao diện mở ra
             setTimeout(veTatCaBieuDo, 300);
         } else {
             document.getElementById('lblPinError').style.display = 'block';
@@ -334,10 +331,6 @@
         document.getElementById(`btn_pt_${id}`).style.display = 'block';
         document.getElementById(`pt_${id}`).value = 0;
         tinhToanTatCa();
-    }
-
-    function layThongKeDongBoChuan(thangDangChonRaw) {
-        return `Đã tích hợp và đồng bộ lịch sử dữ liệu liên tục từ <b>Tháng 12/2025</b> đến <b>${dinhDangThangNam(thangDangChonRaw)}</b>.`;
     }
 
     function laySoCuThongMinh(thangHienTai) {
@@ -443,7 +436,7 @@
                             💰 Tổng cộng: <span id="tong_${i}" style="color:#d00; font-weight:bold;">0</span> đ
                         </div>
                     </div>
-                    <div class="chart-container" id="chart_div_${i}"></div>
+                    <div class="chart-container" id="chart_div_${roomNum}"></div>
                 </div>
             `;
         }
@@ -462,9 +455,9 @@
         }
         const thangHienTaiRaw = document.getElementById('thangNam').value;
         if(!danhSachThang.includes(thangHienTaiRaw)) danhSachThang.push(thangHienTaiRaw);
-        danhSachThang.sort();
+        gridThang = danhSachThang.sort();
 
-        let sáuThángGầnNhất = danhSachThang.slice(Math.max(0, danhSachThang.indexOf(thangHienTaiRaw) - 5), danhSachThang.indexOf(thangHienTaiRaw) + 1);
+        let sáuThángGầnNhất = gridThang.slice(Math.max(0, gridThang.indexOf(thangHienTaiRaw) - 5), gridThang.indexOf(thangHienTaiRaw) + 1);
 
         for (let roomNum = 1; roomNum <= 7; roomNum++) {
             let dataTable = new google.visualization.DataTable();
@@ -536,7 +529,6 @@
             if (soMoi < soCu) continue;
 
             let chenhLech = soMoi - soCu; let tDien = chenhLech * donGiaDien; let tongCong = tPhong + tDien + tienRac + phuThu;
-            imgQr.onload = function() { window.print(); }; 
             tongKwhAllRooms += chenhLech; tongTienDienThu += tDien;
 
             document.getElementById(`cl_${i}`).innerText = chenhLech;
@@ -564,6 +556,7 @@
         elHaoHut.style.color = loiNhuanHaoHut >= 0 ? "#34c759" : "#ff3b30";
     }
 
+    /* SỬA LỖI HIỂN THỊ 2 LẦN LỆNH IN BẰNG BIẾN CỜ hasPrinted */
     function inHoaDon(roomNum) {
         const r = listRoomsData.find(item => item.i === roomNum);
         const thangLabel = dinhDangThangNam(document.getElementById('thangNam').value);
@@ -576,12 +569,23 @@
 
         const imgQr = document.getElementById('qrImageElement');
         if (imgQr) { 
-            imgQr.onload = function() { window.print(); }; 
-            setTimeout(function(){ if(!imgQr.complete) { window.print(); } }, 2000); 
+            let hasPrinted = false; // Biến cờ ngăn in lần thứ 2
+
+            imgQr.onload = function() { 
+                if (!hasPrinted) {
+                    hasPrinted = true;
+                    window.print(); 
+                }
+            }; 
+            setTimeout(function(){ 
+                if(!hasPrinted) { 
+                    hasPrinted = true;
+                    window.print(); 
+                } 
+            }, 2000); 
         }
     }
 
-    // ☁️ NÚT 1: CHỈ LÀM NHIỆM VỤ LƯU ONLINE LÊN GOOGLE SHEETS
     async function luuDuLieuLenOnline() {
         const rawDate = document.getElementById('thangNam').value;
         const thangLabel = dinhDangThangNam(rawDate);
@@ -608,7 +612,6 @@
         }
     }
 
-    // 📊 NÚT 2: CHỈ LÀM NHIỆM VỤ TẢI FILE EXCEL BACKUP VỀ MAC
     function taiFileExcelBackup() {
         const rawDate = document.getElementById('thangNam').value;
         const thangLabel = dinhDangThangNam(rawDate);

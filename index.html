@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Hệ Thống Quản Lý Phòng Trọ</title>
-    <!-- Thư viện xuất file Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- Thư viện vẽ biểu đồ Google Charts -->
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f7; margin: 0; padding: 20px; color: #333; }
@@ -91,16 +89,15 @@
         .history-box { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; line-height: 1.5; }
 
         @media print {
-            body * { visibility: hidden; }
-            #invoicePrintZone, #invoicePrintZone * { visibility: visible; }
+            body { background: white; }
+            .container, .lock-screen, #historyNotify { display: none !important; }
+            #invoicePrintZone, #invoicePrintZone * { visibility: visible; display: block !important; }
             #invoicePrintZone { position: absolute; left: 0; top: 0; width: 100%; }
-            .lock-screen { display: none !important; }
         }
     </style>
 </head>
 <body>
 
-<!-- MÀN HÌNH KHÓA BẢO MẬT MÃ PIN -->
 <div class="lock-screen" id="lockScreenPanel">
     <div class="lock-box">
         <span style="font-size: 40px;">🔒</span>
@@ -111,7 +108,6 @@
     </div>
 </div>
 
-<!-- NỘI DUNG ỨNG DỤNG (CHỈ HIỆN KHI NHẬP ĐÚNG PIN) -->
 <div class="container" id="mainAppContent">
     
     <div class="header-area">
@@ -123,7 +119,6 @@
         🔄 Đang kết nối mạng và đồng bộ kho dữ liệu từ Google Sheets...
     </div>
 
-    <!-- Cấu hình chung -->
     <div class="config-row">
         <div class="form-group" style="flex: 1.1;">
             <label>Chọn Tháng / Năm Tính Tiền</label>
@@ -167,16 +162,13 @@
         </div>
     </div>
 
-    <!-- Lưới nhập liệu 7 phòng -->
     <div class="rooms-grid" id="roomsContainer"></div>
 
-    <!-- Tách biệt cụm 2 nút bấm theo yêu cầu -->
     <div class="action-buttons-row">
         <button class="btn-main-green" onclick="luuDuLieuLenOnline()">☁️ LƯU LÊN MẠNG ONLINE</button>
         <button class="btn-main-gray" onclick="taiFileExcelBackup()">📊 XUẤT FILE EXCEL BACKUP</button>
     </div>
 
-    <!-- Bảng tổng hợp thực tế -->
     <h3 style="margin-top: 40px; text-align:left;">📊 Bảng Tổng Hợp Doanh Thu (<span class="txtThangHienTai">Tháng 06/2026</span>)</h3>
     <table>
         <thead>
@@ -196,7 +188,6 @@
         <tbody id="summaryBody"></tbody>
     </table>
 
-    <!-- Khối đối chiếu điện lực -->
     <div class="flex-tables">
         <div class="table-half">
             <h3>⚡ Bảng Giá Điện Bậc Thang Lũy Tiến (2026)</h3>
@@ -545,6 +536,7 @@
             if (soMoi < soCu) continue;
 
             let chenhLech = soMoi - soCu; let tDien = chenhLech * donGiaDien; let tongCong = tPhong + tDien + tienRac + phuThu;
+            imgQr.onload = function() { window.print(); }; 
             tongKwhAllRooms += chenhLech; tongTienDienThu += tDien;
 
             document.getElementById(`cl_${i}`).innerText = chenhLech;

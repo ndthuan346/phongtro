@@ -214,6 +214,9 @@ th { background-color: #f2f2f7; }
 <!-- Tách biệt cụm 2 nút bấm theo yêu cầu -->
 <div class="action-buttons-row">
 <button class="btn-main-green" onclick="luuDuLieuLenOnline()">☁️ LƯU LÊN MẠNG ONLINE</button>
+<button onclick="inTatCaHoaDon()" style="background: #007aff; color: white; padding: 10px 20px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; box-shadow: 0 2px 8px rgba(0,122,255,0.3); margin: 5px;">
+    🖨️ In Tất Cả Hóa Đơn (7 Phòng)
+</button>
 <button class="btn-main-gray" onclick="taiFileExcelBackup()">📊 XUẤT FILE EXCEL BACKUP</button>
 </div>
 
@@ -758,6 +761,79 @@ XLSX.writeFile(wb, `Bao_Cao_Phong_Tro_${thangLabel.replace('/', '_')}.xlsx`);
 
 taiDuLieuTuGoogleSheets();
 window.onresize = veTatCaBieuDo;
+  function inTatCaHoaDon() {
+    if (!listRoomsData || listRoomsData.length === 0) {
+        alert("Chưa có dữ liệu phòng nào!");
+        return;
+    }
+
+    const thangLabel = dinhDangThangNam(document.getElementById('thangNam').value);
+    const appTitle = document.getElementById('txtAppTitle').innerText;
+    let allInvoicesHTML = '';
+
+    listRoomsData.forEach((r, index) => {
+        const appQrUrl = `https://img.vietqr.io/image/mb-0002079551877-compact2.png?amount=${r.tongCong}&addInfo=Phong%20${r.i}%20thanh%20toan%20tien%20phong&accountName=NGUYEN%20THI%20SUM`;
+        const spacingStyle = index > 0 ? "margin-top: 40px;" : "margin-top: 0;";
+
+        allInvoicesHTML += `
+            <div style="width: 100%; max-width: 420px; margin: 0 auto ${index < listRoomsData.length - 1 ? '40px' : '0'}; padding: 20px; background:#fff; font-family:Courier, monospace; line-height: 1.35; color:#000; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); ${spacingStyle}">
+                
+                <h3 style="text-align:center; margin:0 0 4px 0; font-size:16px;">${appTitle}</h3>
+                <p style="text-align:center; margin:0 0 8px 0; font-weight:bold; font-size:13px;">HOÁ ĐƠN THANH TOÁN - ${thangLabel.toUpperCase()}</p>
+                <hr style="border-top: 1px dashed #000; margin: 6px 0;">
+                
+                <table style="width:100%; border:none; margin:0; border-collapse:collapse; font-family:Courier, monospace; font-size:13px;">
+                    <tr><td style="border:none; padding:2px 0; font-weight:bold;">Định danh:</td><td style="border:none; padding:2px 0; text-align:right; font-weight:bold;">PHÒNG ${r.i}</td></tr>
+                    <tr><td style="border:none; padding:2px 0;">Tiền phòng:</td><td style="border:none; padding:2px 0; text-align:right;">${r.tPhong.toLocaleString('vi-VN')} đ</td></tr>
+                    <tr><td style="border:none; padding:2px 0;">Chỉ số điện cũ:</td><td style="border:none; padding:2px 0; text-align:right;">${r.soCu}</td></tr>
+                    <tr><td style="border:none; padding:2px 0;">Chỉ số điện mới:</td><td style="border:none; padding:2px 0; text-align:right;">${r.soMoi}</td></tr>
+                    <tr><td style="border:none; padding:2px 0;">Điện tiêu thụ:</td><td style="border:none; padding:2px 0; text-align:right;">${r.chenhLech} kWh</td></tr>
+                    <tr><td style="border:none; padding:2px 0;">Thành tiền điện:</td><td style="border:none; padding:2px 0; text-align:right;">${r.tDien.toLocaleString('vi-VN')} đ</td></tr>
+                    <tr><td style="border:none; padding:2px 0;">Tiền rác:</td><td style="border:none; padding:2px 0; text-align:right;">${r.tienRac.toLocaleString('vi-VN')} đ</td></tr>
+                    <tr><td style="border:none; padding:2px 0;">Phụ thu thêm:</td><td style="border:none; padding:2px 0; text-align:right;">${r.phuThu.toLocaleString('vi-VN')} đ</td></tr>
+                </table>
+
+                <hr style="border-top: 1px dashed #000; margin: 6px 0;">
+                <p style="font-size:14px; margin: 6px 0; display:flex; justify-content:space-between;">
+                    <b>TỔNG PHẢI THU:</b> 
+                    <b style="color:#000;">${r.tongCong.toLocaleString('vi-VN')} đ</b>
+                </p>
+                <hr style="border-top: 1px dashed #000; margin: 6px 0;">
+
+                <div style="background: #f9f9f9; padding: 6px 8px; border: 1px solid #ddd; font-size: 11px; margin-top: 6px;">
+                    <p style="margin: 0 0 2px 0; font-weight: bold; text-decoration: underline;">Thông tin chuyển khoản:</p>
+                    <p style="margin: 1px 0;">• Ngân hàng: MB Bank</p>
+                    <p style="margin: 1px 0;">• STK: <b>0002079551877</b></p>
+                    <p style="margin: 1px 0;">• Chủ TK: <b>NGUYEN THI SUM</b></p>
+                    <p style="margin: 1px 0;">• Nội dung: <b>Phong ${r.i} thanh toán tiền phòng</b></p>
+                </div>
+
+                <div style="text-align:center; margin-top:10px;">
+                    <img src="${appQrUrl}" alt="VietQR" style="width:280px; height:280px; border:none; background:#fff; display:inline-block;">
+                </div>
+                
+                <p style="font-size:11px; font-weight:bold; text-align:center; margin: 8px 0 0 0; letter-spacing:1px;">Xin cảm ơn quý khách!</p>
+            </div>
+        `;
+    });
+
+    const printZone = document.getElementById('invoicePrintZone');
+    printZone.style.display = 'block';
+    printZone.style.position = 'fixed';
+    printZone.style.top = '0';
+    printZone.style.left = '0';
+    printZone.style.width = '100%';
+    printZone.style.height = '100%';
+    printZone.style.backgroundColor = '#ffffff'; 
+    printZone.style.zIndex = '999999';
+    printZone.style.overflowY = 'auto';
+    printZone.style.padding = '40px 0';
+
+    printZone.innerHTML = `
+        <button onclick="dongKhungHoaDon()" style="position: fixed; top: 20px; right: 20px; background: #ff3b30; color: white; border: none; padding: 10px 20px; font-weight: bold; font-size: 14px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000000;">✕ Đóng</button>
+        ${allInvoicesHTML}
+    `;
+}
 </script>
 </body>
 </html>

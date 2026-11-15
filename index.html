@@ -91,15 +91,17 @@ th { background-color: #f2f2f7; }
 .history-box { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; line-height: 1.5; }
 
 @media print {
+body * { visibility: hidden; }
+#invoicePrintZone, #invoicePrintZone * { visibility: visible; }
+#invoicePrintZone { position: absolute; left: 0; top: 0; width: 100%; }
+.lock-screen { display: none !important; }
+}
         body * { display: none !important; }
         #invoicePrintZone, #invoicePrintZone * { display: block !important; visibility: visible !important; }
         #invoicePrintZone { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
         .lock-screen { display: none !important; }
         @page { size: auto; margin: 5mm; }
     }
-</style>
-</head>
-<body>
 
 <!-- MÀN HÌNH KHÓA BẢO MẬT MÃ PIN -->
 <div class="lock-screen" id="lockScreenPanel">

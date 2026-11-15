@@ -622,7 +622,7 @@ function inHoaDon(roomNum) {
 
     const printZone = document.getElementById('invoicePrintZone');
     
-    // Tạo nền trắng bự phủ toàn bộ màn hình
+    // Ép hiển thị khung nền trắng che toàn màn hình
     printZone.style.display = 'block';
     printZone.style.position = 'fixed';
     printZone.style.top = '0';
@@ -630,14 +630,14 @@ function inHoaDon(roomNum) {
     printZone.style.width = '100%';
     printZone.style.height = '100%';
     printZone.style.backgroundColor = '#ffffff'; 
-    printZone.style.zIndex = '99999';
+    printZone.style.zIndex = '999999';
     printZone.style.overflowY = 'auto';
-    printZone.style.padding = '20px 0';
+    printZone.style.padding = '30px 0';
 
     printZone.innerHTML = `
-        <div style="width: 100%; max-width: 420px; margin: 20px auto; padding: 20px; background:#fff; font-family:Courier, monospace; line-height: 1.35; color:#000; box-sizing: border-box; border: 1px solid #e5e5ea; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); position: relative;">
+        <div style="width: 100%; max-width: 420px; margin: 0 auto; padding: 20px; background:#fff; font-family:Courier, monospace; line-height: 1.35; color:#000; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); position: relative;">
             
-            <!-- Nút đóng -->
+            <!-- Nút đóng popup -->
             <button onclick="dongKhungHoaDon()" style="position: absolute; top: 12px; right: 12px; background: #ff3b30; color: white; border: none; padding: 6px 12px; font-weight: bold; border-radius: 6px; cursor: pointer;">✕ Đóng</button>
 
             <h3 style="text-align:center; margin:0 0 4px 0; font-size:16px;">${document.getElementById('txtAppTitle').innerText}</h3>
@@ -677,6 +677,13 @@ function inHoaDon(roomNum) {
             <p style="font-size:11px; font-weight:bold; text-align:center; margin: 8px 0 0 0; letter-spacing:1px;">Xin cảm ơn quý khách!</p>
         </div>
     `;
+}
+
+// Đảm bảo hàm đóng hoạt động mượt mà
+function dongKhungHoaDon() {
+    const printZone = document.getElementById('invoicePrintZone');
+    printZone.style.display = 'none';
+    printZone.innerHTML = '';
 }
 
 // Hàm phụ trợ để tắt khung hóa đơn khi xem xong

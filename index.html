@@ -622,27 +622,27 @@ function inHoaDon(roomNum) {
 
     const printZone = document.getElementById('invoicePrintZone');
     
-    // Thiết lập để khung hóa đơn hiện đè lên màn hình web dưới dạng một bảng xem trước (Modal) cực kỳ rõ nét
+    // Tạo nền trắng bự phủ toàn bộ màn hình
     printZone.style.display = 'block';
     printZone.style.position = 'fixed';
     printZone.style.top = '0';
     printZone.style.left = '0';
     printZone.style.width = '100%';
     printZone.style.height = '100%';
-    printZone.style.backgroundColor = 'rgba(0,0,0,0.6)'; // Làm mờ nền phía sau
+    printZone.style.backgroundColor = '#ffffff'; 
     printZone.style.zIndex = '99999';
     printZone.style.overflowY = 'auto';
     printZone.style.padding = '20px 0';
 
     printZone.innerHTML = `
-        <div style="width: 100%; max-width: 420px; margin: 30px auto; padding: 20px; background:#fff; font-family:Courier, monospace; line-height: 1.3; color:#000; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative;">
+        <div style="width: 100%; max-width: 420px; margin: 20px auto; padding: 20px; background:#fff; font-family:Courier, monospace; line-height: 1.35; color:#000; box-sizing: border-box; border: 1px solid #e5e5ea; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); position: relative;">
             
-            <!-- Nút đóng bảng xem trước -->
-            <button onclick="dongKhungHoaDon()" style="position: absolute; top: 10px; right: 10px; background: #ff3b30; color: white; border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; cursor: pointer;">✕ Đóng</button>
+            <!-- Nút đóng -->
+            <button onclick="dongKhungHoaDon()" style="position: absolute; top: 12px; right: 12px; background: #ff3b30; color: white; border: none; padding: 6px 12px; font-weight: bold; border-radius: 6px; cursor: pointer;">✕ Đóng</button>
 
-            <h3 style="text-align:center; margin:0 0 3px 0; font-size:16px;">${document.getElementById('txtAppTitle').innerText}</h3>
-            <p style="text-align:center; margin:0 0 6px 0; font-weight:bold; font-size:13px;">HOÁ ĐƠN THANH TOÁN - ${thangLabel.toUpperCase()}</p>
-            <hr style="border-top: 1px dashed #000; margin: 4px 0;">
+            <h3 style="text-align:center; margin:0 0 4px 0; font-size:16px;">${document.getElementById('txtAppTitle').innerText}</h3>
+            <p style="text-align:center; margin:0 0 8px 0; font-weight:bold; font-size:13px;">HOÁ ĐƠN THANH TOÁN - ${thangLabel.toUpperCase()}</p>
+            <hr style="border-top: 1px dashed #000; margin: 6px 0;">
             
             <table style="width:100%; border:none; margin:0; border-collapse:collapse; font-family:Courier, monospace; font-size:13px;">
                 <tr><td style="border:none; padding:2px 0; font-weight:bold;">Định danh:</td><td style="border:none; padding:2px 0; text-align:right; font-weight:bold;">PHÒNG ${r.i}</td></tr>
@@ -655,14 +655,14 @@ function inHoaDon(roomNum) {
                 <tr><td style="border:none; padding:2px 0;">Phụ thu thêm:</td><td style="border:none; padding:2px 0; text-align:right;">${r.phuThu.toLocaleString('vi-VN')} đ</td></tr>
             </table>
 
-            <hr style="border-top: 1px dashed #000; margin: 4px 0;">
-            <p style="font-size:14px; margin: 4px 0; display:flex; justify-content:space-between;">
+            <hr style="border-top: 1px dashed #000; margin: 6px 0;">
+            <p style="font-size:14px; margin: 6px 0; display:flex; justify-content:space-between;">
                 <b>TỔNG PHẢI THU:</b> 
                 <b style="color:#000;">${r.tongCong.toLocaleString('vi-VN')} đ</b>
             </p>
-            <hr style="border-top: 1px dashed #000; margin: 4px 0;">
+            <hr style="border-top: 1px dashed #000; margin: 6px 0;">
 
-            <div style="background: #f9f9f9; padding: 5px 6px; border: 1px solid #ddd; font-size: 11px; margin-top: 4px;">
+            <div style="background: #f9f9f9; padding: 6px 8px; border: 1px solid #ddd; font-size: 11px; margin-top: 6px;">
                 <p style="margin: 0 0 2px 0; font-weight: bold; text-decoration: underline;">Thông tin chuyển khoản:</p>
                 <p style="margin: 1px 0;">• Ngân hàng: MB Bank</p>
                 <p style="margin: 1px 0;">• STK: <b>0002079551877</b></p>
@@ -670,12 +670,11 @@ function inHoaDon(roomNum) {
                 <p style="margin: 1px 0;">• Nội dung: <b>Phòng ${r.i} thanh toán tiền phòng</b></p>
             </div>
 
-            <div style="text-align:center; margin-top:6px;">
-                <p style="font-size:11px; font-weight:bold; margin-bottom:3px;">QUÉT MÃ QR CHUYỂN KHOẢN</p>
-                <img src="${appQrUrl}" alt="VietQR" style="width:280px; height:280px; border:1px solid #ccc; padding:3px; background:#fff; display:inline-block;">
+            <div style="text-align:center; margin-top:10px;">
+                <img src="${appQrUrl}" alt="VietQR" style="width:280px; height:280px; border:none; background:#fff; display:inline-block;">
             </div>
             
-            <p style="font-size:11px; font-weight:bold; text-align:center; margin: 6px 0 0 0; letter-spacing:1px;">Xin cảm ơn quý khách!</p>
+            <p style="font-size:11px; font-weight:bold; text-align:center; margin: 8px 0 0 0; letter-spacing:1px;">Xin cảm ơn quý khách!</p>
         </div>
     `;
 }

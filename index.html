@@ -91,10 +91,32 @@ th { background-color: #f2f2f7; }
 .history-box { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500; line-height: 1.5; }
 
 @media print {
-body * { visibility: hidden; }
-#invoicePrintZone, #invoicePrintZone * { visibility: visible; }
-#invoicePrintZone { position: absolute; left: 0; top: 0; width: 100%; }
-.lock-screen { display: none !important; }
+  /* Ẩn toàn bộ body trừ vùng in hóa đơn */
+  body * {
+    display: none !important;
+  }
+  
+  /* Chỉ hiển thị duy nhất khung chứa hóa đơn khi in */
+  #invoicePrintZone, #invoicePrintZone * {
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  #invoicePrintZone {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  /* Ép kích thước trang giấy in khớp tuyệt đối để không bị nhảy trang thừa */
+  @page {
+    size: auto;
+    margin: 0mm;
+  }
 }
 </style>
 </head>

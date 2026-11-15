@@ -635,11 +635,8 @@ function inHoaDon(roomNum) {
     printZone.style.padding = '30px 0';
 
     printZone.innerHTML = `
-        <div style="width: 100%; max-width: 420px; margin: 0 auto; padding: 20px; background:#fff; font-family:Courier, monospace; line-height: 1.35; color:#000; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); position: relative;">
+        <div style="width: 100%; max-width: 420px; margin: 0 auto; padding: 20px; background:#fff; font-family:Courier, monospace; line-height: 1.35; color:#000; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
             
-            <!-- Nút đóng popup -->
-            <button onclick="dongKhungHoaDon()" style="position: absolute; top: 12px; right: 12px; background: #ff3b30; color: white; border: none; padding: 6px 12px; font-weight: bold; border-radius: 6px; cursor: pointer;">✕ Đóng</button>
-
             <h3 style="text-align:center; margin:0 0 4px 0; font-size:16px;">${document.getElementById('txtAppTitle').innerText}</h3>
             <p style="text-align:center; margin:0 0 8px 0; font-weight:bold; font-size:13px;">HOÁ ĐƠN THANH TOÁN - ${thangLabel.toUpperCase()}</p>
             <hr style="border-top: 1px dashed #000; margin: 6px 0;">
@@ -674,9 +671,20 @@ function inHoaDon(roomNum) {
                 <img src="${appQrUrl}" alt="VietQR" style="width:280px; height:280px; border:none; background:#fff; display:inline-block;">
             </div>
             
-            <p style="font-size:11px; font-weight:bold; text-align:center; margin: 8px 0 0 0; letter-spacing:1px;">Xin cảm ơn quý khách!</p>
+            <p style="font-size:11px; font-weight:bold; text-align:center; margin: 8px 0 4px 0; letter-spacing:1px;">Xin cảm ơn quý khách!</p>
+
+            <!-- Nút đóng được dời xuống dưới cùng, canh giữa -->
+            <div style="text-align:center; margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 10px;">
+                <button onclick="dongKhungHoaDon()" style="background: #ff3b30; color: white; border: none; padding: 8px 24px; font-weight: bold; font-size: 13px; border-radius: 6px; cursor: pointer;">✕ Đóng</button>
+            </div>
         </div>
     `;
+}
+
+function dongKhungHoaDon() {
+    const printZone = document.getElementById('invoicePrintZone');
+    printZone.style.display = 'none';
+    printZone.innerHTML = '';
 }
 
 // Đảm bảo hàm đóng hoạt động mượt mà
